@@ -2,7 +2,7 @@ var fs = require("fs");
 
 var inputFileName = process.argv[2];
 
-function mergeData(output, outputData, mapDatas, v) {
+function mergeData(outputData, mapDatas, v) {
 	var layers = outputData.layers;
 	for(var l = 0; l < layers.length; l++) {
 		layers[l].data = [];
@@ -26,16 +26,13 @@ function mergeData(output, outputData, mapDatas, v) {
 			else {
 				outputData.layers[l].width += layers[l].width;
 			}
-//			console.log(outputData.layers[l].width + "x" + outputData.layers[l].height);;
 		}
 	}
 
-	var str = JSON.stringify(outputData, null, '\t');
-	fs.writeFileSync(output, str);
-	console.log("Output: " + output)
+	return outputData;
 }
 
-function mergeV(output, mapDatas) {
+function mergeV(mapDatas) {
 	var height = 0;
 	var n = mapDatas.length;
 	var outputData = JSON.parse(JSON.stringify(mapDatas[0]));
@@ -46,10 +43,10 @@ function mergeV(output, mapDatas) {
 	}
 	outputData.height = height;
 
-	mergeData(output, outputData, mapDatas, true);
+	return mergeData(outputData, mapDatas, true);
 }
 
-function mergeH(output, mapDatas) {
+function mergeH(mapDatas) {
 	var width = 0;
 	var n = mapDatas.length;
 	var outputData = JSON.parse(JSON.stringify(mapDatas[0]));
@@ -60,7 +57,7 @@ function mergeH(output, mapDatas) {
 	}
 	outputData.width = width;
 
-	mergeData(output, outputData, mapDatas, false);
+	return mergeData(outputData, mapDatas, false);
 }
 
 function merge(inputData) {
@@ -74,11 +71,16 @@ function merge(inputData) {
 	}
 
 	if(inputData.direction && inputData.direction[0] === 'v') {
-		mergeV(inputData.output, mapDatas);
+		var outputData = mergeV(mapDatas);
 	}
 	else {
-		mergeH(inputData.output, mapDatas);
+		var outputData = mergeH(mapDatas);
 	}
+
+	var output = inputData.output;
+	console.log("Output: " + output)
+	var str = JSON.stringify(outputData, null, '\t');
+	fs.writeFileSync(output, str);
 }
 
 if(inputFileName) {
